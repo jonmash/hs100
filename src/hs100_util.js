@@ -14,7 +14,7 @@ var HS100Util = function () {
           }
         }
       });
-        
+
   this.commands['query'] = JSON.stringify({
         "system":{
           "get_sysinfo":null

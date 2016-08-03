@@ -7,26 +7,26 @@ if(argv.help || argv.h || argv._[0] == "help") {
 }
 
 var options = {
-	host: argv.host || argv.H || "192.168.0.110",
-	port: argv.port || argv.p || 9999
+  host: argv.host || argv.H || "192.168.0.110",
+  port: argv.port || argv.p || 9999
 };
 
 if(!hs100.commands[argv._[0]]) {
-	console.error("Unknown Command");
+  console.error("Unknown Command");
   display_usage_info_and_exit();
-	process.exit(1);
+  process.exit(1);
 }
 
 var command = hs100.commands[argv._[0]];
 var debug = (argv.debug) ? true : false;
 
 const client = net.connect(options, () => {
-	if(debug){console.log('connected to server!');}
-	var header = new Buffer(4);
-	header.writeUInt32BE(command.length);
-	var json = new Buffer(command);
-	if(debug){console.log(Buffer.concat([header, hs100.encrypt(json)]).toString("hex"));}
-	client.write(Buffer.concat([header, hs100.encrypt(json)]));
+  if(debug){console.log('connected to server!');}
+  var header = new Buffer(4);
+  header.writeUInt32BE(command.length);
+  var json = new Buffer(command);
+  if(debug){console.log(Buffer.concat([header, hs100.encrypt(json)]).toString("hex"));}
+  client.write(Buffer.concat([header, hs100.encrypt(json)]));
 });
 
 // Kill the connection after a timeout
@@ -58,10 +58,10 @@ client.on('data', (data) => {
   } catch(error) {
     console.log(error);
   }
-	client.end();
+  client.end();
 });
 client.on('end', () => {
-	if(debug){console.log('disconnected from server');}
+  if(debug){console.log('disconnected from server');}
   clearTimeout(timer);
 });
 
