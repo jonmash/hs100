@@ -2,7 +2,7 @@
 
 var argv = require('minimist')(process.argv.slice(2));
 
-const hs100 = require('./src/hs100.js');
+const hs100 = require('../index.js');
 
 if(argv.help || argv.h || argv._[0] == "help") {
     display_usage_info_and_exit();
