@@ -1,6 +1,6 @@
 'use strict';
 const net = require('net');
-var util = require('util');
+const util = require('util');
 
 var HS100Util = function () {
     this.commands = [];
