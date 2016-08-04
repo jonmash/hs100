@@ -2,7 +2,7 @@
 
 var argv = require('minimist')(process.argv.slice(2));
 
-const hs100 = require('./hs100_util.js');
+const hs100 = require('./src/hs100.js');
 
 if(argv.help || argv.h || argv._[0] == "help") {
     display_usage_info_and_exit();
@@ -47,7 +47,7 @@ if (argv._[0] == "all") {
 function display_usage_info_and_exit() {
     console.log(
         "\n"+
-        "Usage: node hs100.js [options] command\n"+
+        "Usage: node index.js [options] command\n"+
         "\n"+
         "An application for controlling HS100 compatible smart plugs.\n"+
         "\n"+
