@@ -1,89 +1,71 @@
+'use strict';
+
 var argv = require('minimist')(process.argv.slice(2));
-const net = require('net');
+
 const hs100 = require('./hs100_util.js');
 
 if(argv.help || argv.h || argv._[0] == "help") {
-  display_usage_info_and_exit();
+    display_usage_info_and_exit();
 }
 
 var options = {
-  host: argv.host || argv.H || "192.168.0.110",
-  port: argv.port || argv.p || 9999
+    host: argv.host || argv.H || "192.168.0.110",
+    port: argv.port || argv.p || 9999,
+    timeout: argv.timeout || argv.t || 2000,
+    debug: (argv.debug) ? true : false,
 };
 
-if(!hs100.commands[argv._[0]]) {
-  console.error("Unknown Command");
-  display_usage_info_and_exit();
-  process.exit(1);
+if (argv._[0] == "all") {
+
+    if(!hs100.valid_command(argv._[1])) {
+        console.error("Unknown Command: " + argv._[1]);
+        display_usage_info_and_exit();
+    }
+
+    hs100.broadcast(argv._[1], options, (result) => {
+        if(!result) {
+            console.error("Error running command: " + argv._[1]);
+        }
+        console.log(result);
+    });
+
+} else {
+
+    if(!hs100.valid_command(argv._[0])) {
+        console.error("Unknown Command: " + argv._[0]);
+        display_usage_info_and_exit();
+    }
+
+    hs100.send(argv._[0], options, (result) => {
+        if(!result) {
+            console.error("Error running command: " + argv._[0]);
+        }
+        console.log(result);
+    });
 }
 
-var command = hs100.commands[argv._[0]];
-var debug = (argv.debug) ? true : false;
-
-const client = net.connect(options, () => {
-  if(debug){console.log('connected to server!');}
-  var header = new Buffer(4);
-  header.writeUInt32BE(command.length);
-  var json = new Buffer(command);
-  if(debug){console.log(Buffer.concat([header, hs100.encrypt(json)]).toString("hex"));}
-  client.write(Buffer.concat([header, hs100.encrypt(json)]));
-});
-
-// Kill the connection after a timeout
-var timer = setTimeout(function() {
-  console.log("Timeout!");
-  client.destroy();
-  process.exit(1);
-}, 5000);
-
-client.on('data', (data) => {
-  var decrypted = hs100.decrypt(data.slice(4));
-  if(debug){console.log(decrypted.toString());}
-  try {
-    var parsed = JSON.parse(decrypted.toString());
-    if (parsed &&
-        parsed.system &&
-        parsed.system.set_relay_state &&
-        parsed.system.set_relay_state.err_code == 0) {
-      console.log("Success!");
-    } else if (
-        parsed &&
-        parsed.system &&
-        parsed.system.get_sysinfo &&
-        parsed.system.get_sysinfo.err_code == 0) {
-      var util = require('util');
-      console.log("Success:");
-      console.log(util.inspect(parsed, false, null));
-    }
-  } catch(error) {
-    console.log(error);
-  }
-  client.end();
-});
-client.on('end', () => {
-  if(debug){console.log('disconnected from server');}
-  clearTimeout(timer);
-});
-
-
 function display_usage_info_and_exit() {
-  console.log(
-    "\n"+
-    "Usage: node hs100.js [options] command\n"+
-    "\n"+
-    "An application for controlling HS100 compatible smart plugs.\n"+
-    "\n"+
-    "Options:\n"+
-    "\n"+
-    "  -h, --help           Display this usage information.\n"+
-    "  -p, --port           Specifies the port to connect on. Default: 9999\n"+
-    "  -H, --host           Specifies the HOST to connect to. Default: 192.168.0.110\n"+
-    "\n"+
-    "Commands:\n"+
-    "\n"+
-    "  on                   Turns on the outlet.\n"+
-    "  off                  Turns off the outlet.\n"+
-    "  query                Queries the device for status information.\n"
-  )
-  process.exit(0);
+    console.log(
+        "\n"+
+        "Usage: node hs100.js [options] command\n"+
+        "\n"+
+        "An application for controlling HS100 compatible smart plugs.\n"+
+        "\n"+
+        "Options:\n"+
+        "\n"+
+        "  -h, --help           Display this usage information.\n"+
+        "  -p, --port           Specifies the port to connect on. Default: 9999\n"+
+        "  -H, --host           Specifies the HOST to connect to. Default: 192.168.0.110\n"+
+        "  -t, --timeout        Specifies the amount of time to wait for the command to\n" +
+        "                       complete in ms. Default: 2000ms\n"+
+        "  --debug              Enable verbose debug message. Default: false\n"+
+        "\n"+
+        "Commands:\n"+
+        "\n"+
+        "  all [command]        Broadcasts a command to all devices on the subnet."+
+        "  on                   Turns on the outlet.\n"+
+        "  off                  Turns off the outlet.\n"+
+        "  query                Queries the device for status information.\n"
+    );
+    process.exit(0);
 }
