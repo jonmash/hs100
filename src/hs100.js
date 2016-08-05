@@ -4,14 +4,14 @@ const util = require('util');
 
 var HS100Util = function () {
     this.commands = [];
-    this.commands['on'] = JSON.stringify({
+    this.commands.on = JSON.stringify({
             "system":{
                 "set_relay_state":{
                     "state":1
                 }
             }
         });
-    this.commands['off'] = JSON.stringify({
+    this.commands.off = JSON.stringify({
             "system":{
                 "set_relay_state":{
                     "state":0
@@ -19,7 +19,7 @@ var HS100Util = function () {
             }
         });
 
-    this.commands['query'] = JSON.stringify({
+    this.commands.query = JSON.stringify({
             "system":{
                 "get_sysinfo":null
             }
@@ -55,7 +55,7 @@ HS100Util.prototype.encrypt = function encrypt(input, seed) {
 };
 
 HS100Util.prototype.valid_command = function valid_command(cmd) {
-    return !!(this.commands[cmd])
+    return !!(this.commands[cmd]);
 };
 
 HS100Util.prototype.debug = function debug_print(msg) {
@@ -113,7 +113,7 @@ HS100Util.prototype.broadcast = function broadcast_cmd(cmd, options, callback) {
 
     udpclient.on('message', (data, info) => {
         var decrypted = this.decrypt(data);
-        var result = this._parse_response(decrypted)
+        var result = this._parse_response(decrypted);
         if (result) {
             return_result.push(result);
         }
