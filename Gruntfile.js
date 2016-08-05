@@ -12,19 +12,46 @@ module.exports = function(grunt) {
                 dest: 'build/<%= pkg.name %>.min.js'
             }
         },
+        nodeunit: {
+            files: ['test/**/*_test.js'],
+        },
         jshint: {
-            all: ['Gruntfile.js', 'src/**/*.js', 'test/**/*.js'],
-            options: {
-                jshintrc: true,
+            gruntfile: {
+                src: 'Gruntfile.js',
             },
-        }
+            source: {
+                src: ['src/**/*.js'],
+            },
+            test: {
+                src: ['test/**/*.js'],
+            },
+            options: {
+                jshintrc: '.jshintrc',
+            },
+        },
+        watch: {
+            gruntfile: {
+                files: '<%= jshint.gruntfile.src %>',
+                tasks: ['jshint:gruntfile']
+            },
+            src: {
+                files: '<%= jshint.source.src %>',
+                tasks: ['jshint:source', 'nodeunit']
+            },
+            test: {
+                files: '<%= jshint.test.src %>',
+                tasks: ['jshint:test', 'nodeunit']
+            },
+        },
     });
 
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-contrib-nodeunit');
+    grunt.loadNpmTasks('grunt-contrib-watch');
 
     // Default task(s).
     grunt.registerTask('uglify', ['uglify']);
-    grunt.registerTask('default', ['jshint']);
+    grunt.registerTask('default', ['jshint', 'nodeunit']);
 
 };
