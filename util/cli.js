@@ -1,8 +1,9 @@
 'use strict';
 
-var argv = require('minimist')(process.argv.slice(2));
+const argv = require('minimist')(process.argv.slice(2));
+const util = require('util');
 
-const hs100 = require('../index.js');
+const hs100 = require('../src/hs100.js');
 
 if(argv.help || argv.h || argv._[0] == "help") {
     display_usage_info_and_exit();
@@ -26,7 +27,7 @@ if (argv._[0] == "all") {
         if(!result) {
             console.error("Error running command: " + argv._[1]);
         }
-        console.log(result);
+        console.log(util.inspect(result, { showHidden: true, depth: null }));
     });
 
 } else {
@@ -40,7 +41,7 @@ if (argv._[0] == "all") {
         if(!result) {
             console.error("Error running command: " + argv._[0]);
         }
-        console.log(result);
+        console.log(util.inspect(result, { showHidden: true, depth: null }));
     });
 }
 
